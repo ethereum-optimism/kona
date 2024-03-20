@@ -2,7 +2,7 @@
 
 use super::L1Traversal;
 use crate::{
-    traits::{ChainProvider, DataAvailabilityProvider, DataIter, ResettableStage},
+    traits::{AsyncIterator, ChainProvider, DataAvailabilityProvider, ResettableStage},
     types::{BlockInfo, StageError, StageResult, SystemConfig},
 };
 use alloc::boxed::Box;
@@ -22,7 +22,7 @@ where
     /// The data availability provider to use for the L1 retrieval stage.
     pub provider: DAP,
     /// The current data iterator.
-    data: Option<DAP::DataIter<Bytes>>,
+    data: Option<DAP::DataIter>,
 }
 
 impl<DAP, CP> L1Retrieval<DAP, CP>
@@ -60,7 +60,13 @@ where
             );
         }
 
-        let data = self.data.as_mut().expect("Cannot be None").next();
+        let data = self
+            .data
+            .as_mut()
+            .expect("Cannot be None")
+            .next()
+            .await
+            .unwrap_or(Err(StageError::Eof));
         match data {
             Ok(data) => Ok(data),
             Err(StageError::Eof) => {
