@@ -310,7 +310,7 @@ checksum = "b1a46d1a171d865aa5f83f92695765caa047a9b4cbae2cbf37dbd613a793fd4c"
 
 [[package]]
 name = "kona-common"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "anyhow",
  "cfg-if",
@@ -319,7 +319,7 @@ dependencies = [
 
 [[package]]
 name = "kona-derive"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "alloy-primitives",
  "alloy-rlp",
@@ -333,7 +333,7 @@ dependencies = [
 
 [[package]]
 name = "kona-preimage"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "anyhow",
  "cfg-if",
