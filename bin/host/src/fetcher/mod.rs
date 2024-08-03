@@ -7,7 +7,9 @@ use alloy_eips::{eip2718::Encodable2718, eip4844::FIELD_ELEMENTS_PER_BLOB, Block
 use alloy_primitives::{address, keccak256, Address, Bytes, B256};
 use alloy_provider::{Provider, ReqwestProvider};
 use alloy_rlp::Decodable;
-use alloy_rpc_types::{Block, BlockNumberOrTag, BlockTransactions, BlockTransactionsKind};
+use alloy_rpc_types::{
+    Block, BlockNumberOrTag, BlockTransactions, BlockTransactionsKind, Transaction,
+};
 use anyhow::{anyhow, Result};
 use kona_client::HintType;
 use kona_derive::{
@@ -162,21 +164,16 @@ where
                     anyhow::bail!("Invalid hint data length: {}", hint_data.len());
                 }
 
-                let hash: B256 = hint_data[0..32]
-                    .as_ref()
-                    .try_into()
-                    .map_err(|e| anyhow!("Failed to convert bytes to B256: {e}"))?;
+                let data = &hint_data[0..32];
+                let hash: B256 =
+                    data.try_into().map_err(|e| anyhow!("Failed to convert bytes to B256: {e}"))?;
+                let data = &hint_data[32..40];
                 let index = u64::from_be_bytes(
-                    hint_data[32..40]
-                        .as_ref()
-                        .try_into()
-                        .map_err(|e| anyhow!("Failed to convert bytes to u64: {e}"))?,
+                    data.try_into().map_err(|e| anyhow!("Failed to convert bytes to u64: {e}"))?,
                 );
+                let data = &hint_data[40..48];
                 let timestamp = u64::from_be_bytes(
-                    hint_data[40..48]
-                        .as_ref()
-                        .try_into()
-                        .map_err(|e| anyhow!("Failed to convert bytes to u64: {e}"))?,
+                    data.try_into().map_err(|e| anyhow!("Failed to convert bytes to u64: {e}"))?,
                 );
 
                 let partial_block_ref = BlockInfo { timestamp, ..Default::default() };
@@ -505,7 +502,7 @@ where
     }
 
     /// Stores a list of [BlockTransactions] in the key-value store.
-    async fn store_transactions(&self, transactions: BlockTransactions) -> Result<()> {
+    async fn store_transactions(&self, transactions: BlockTransactions<Transaction>) -> Result<()> {
         match transactions {
             BlockTransactions::Full(transactions) => {
                 let encoded_transactions = transactions
