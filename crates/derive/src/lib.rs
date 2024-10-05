@@ -30,6 +30,9 @@ pub mod sources;
 pub mod stages;
 pub mod traits;
 
+#[cfg(any(test, feature = "test-utils"))]
+pub mod test_utils;
+
 #[cfg(feature = "metrics")]
 pub mod metrics;
 
